@@ -17,13 +17,13 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
-        validate: {
-            validator: function(phone) {
-                return (/^\d{10}$/.test(phone))
-            },
-            message: 'Please fill a valid mobile number',
-            isAsync: false
-        }
+        // validate: {
+        //     validator: function(phone) {
+        //         return (/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone))
+        //     },
+        //     message: 'Please fill a valid mobile number',
+        //     isAsync: false
+        // }
     },
     email: {
         type: String,

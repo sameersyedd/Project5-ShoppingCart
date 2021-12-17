@@ -15,6 +15,11 @@ const isValidRequestBody = function(requestBody) {
     return Object.keys(requestBody).length > 0
 }
 
+const isValidPassword =function(password){
+    if(password.length>7 && password.length<16 )
+    return true
+}
+
 
 //API 1 Register User =================================================================================================
 
@@ -40,13 +45,17 @@ const registerUser = async function(req, res) {
             return
         }
 
-        if (!isValid(name)) {
+        if (!isValid(name.trim())) {
             res.status(400).send({ status: false, Message: "Please provide a vaild name" })
             return
         }
 
-        if (!isValid(phone)) {
+        if (!isValid(phone.split(' ').join(''))) {
             res.status(400).send({ status: false, Message: "Please provide a vaild phone number" })
+            return
+        }
+        if (! (/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone.split(' ').join('')))) {
+            res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
             return
         }
 
@@ -54,31 +63,42 @@ const registerUser = async function(req, res) {
             res.status(400).send({ status: false, Message: "Please provide a vaild email" })
             return
         }
+        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.split(' ').join('')))) {
+            res.status(400).send({ status: false, message: `Email should be a valid email address` })
+            return
+        }
 
         if (!isValid(password)) {
             res.status(400).send({ status: false, Message: "Please provide a vaild password" })
             return
         }
+        if (!isValidPassword(password)) {
+            res.status(400).send({ status: false, Message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
+            return
+        }
+
 
         if (!isValid(address)) {
             res.status(400).send({ status: false, Message: "Please provide a vaild address" })
             return
         }
-
-        const isEmailAlreadyUsed = await userModel.findOne({ email }); // {email: email} object shorthand property
+        let Email=email.split(' ').join('')
+        const isEmailAlreadyUsed = await userModel.findOne({ email:Email }); // {email: email} object shorthand property
 
         if (isEmailAlreadyUsed) {
-            res.status(400).send({ status: false, message: `${email} email address is already registered` })
+            res.status(400).send({ status: false, message: `${Email} email address is already registered` })
             return
         }
-
-        const isPhoneAlreadyUsed = await userModel.findOne({ phone });
+       let Phone=phone.split(' ').join('')
+        const isPhoneAlreadyUsed = await userModel.findOne({phone:Phone });
 
         if (isPhoneAlreadyUsed) {
-            res.status(400).send({ status: false, message: `${phone}  phone is already registered` })
+            res.status(400).send({ status: false, message: `${Phone}  phone is already registered` })
             return
         }
-        const userData = { title, name, phone, email, password, address }
+        let FPhone=phone.split(' ').join('');
+        let FEmail=email.split(' ').join('')
+        const userData = { title, name, phone:FPhone, email:FEmail, password, address }
         const newUser = await userModel.create(userData);
 
         res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });

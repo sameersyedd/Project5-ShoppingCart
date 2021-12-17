@@ -32,23 +32,29 @@ const isValid = function(value){
         const isTitleAlreadyExsit = await bookModel.findOne({title})
         if(isTitleAlreadyExsit){
             res.status(400).send({msg : "title already exsist"})
+            return
         }
         if(!isValid(excerpt)){
             res.status(400).send({status:false,msg:"excerpt is required"}) 
+            return
         }
        if(!isValid(userId)){
         res.status(400).send({status:false,msg:"userId is required"}) 
+        return
        }
        if(!isValidObjectId(userId)){
            res.status(400).send({status:false,msg:"userId is invalid"})
+           return
        }
        if(!isValid(ISBN)){
         res.status(400).send({status:false,msg:"ISBN is required"}) 
+        return
        }
      //  ISBN = ISBN.trim()
        const isISBNalreadyExsist = await bookModel.findOne({ISBN})
        if(isISBNalreadyExsist){
         res.status(400).send({msg : "ISBN already exsist"})
+        return
        }
        if (!isValid(category)) {
         res.status(400).send({ status: false, message: "category is required" })
@@ -70,7 +76,7 @@ const isValid = function(value){
         res.status(404).send({ status: false, message: "User doesn't exist" })
     }
     requestBody.releasedAt = new Date(requestBody.releasedAt)
-    console.log(requestBody.releasedAt)
+    //console.log(requestBody.releasedAt)
     const bookDetails = await bookModel.create(requestBody)
     res.status(201).send({status: true,message:"Success",data:bookDetails})
 
