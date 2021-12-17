@@ -8,13 +8,14 @@ const userAuth = async function(req, res, next) {
             return;
         }
         const decoded = await jwt.verify(token, 'group1')
-        console.log(decoded)
+      
 
         if (!decoded) {
             res.status(403).send({ status: false, message: `Invalid authentication token in request` })
             return;
         }
         req.decodedtoken = decoded.userId;
+       
         next()
     } catch (error) {
         console.error(`Error! ${error.message}`)
