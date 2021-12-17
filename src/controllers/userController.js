@@ -16,7 +16,7 @@ const isValidRequestBody = function(requestBody) {
 }
 
 
-//API 2 Register User =================================================================================================
+//API 1 Register User =================================================================================================
 
 const registerUser = async function(req, res) {
     try {
