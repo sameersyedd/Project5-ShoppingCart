@@ -19,7 +19,8 @@ const isValidObjectId = function(objectId) {
 const createbook = async function(req, res) {
     try {
         let id = req.body.userId
-        let decodedId = req.decodedtoken.userId
+        let decodedId = req.decodedtoken
+        
         if (id == decodedId) {
             const requestBody = req.body;
             if (!isValidRequestBody(requestBody)) {
