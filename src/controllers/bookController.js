@@ -14,12 +14,12 @@ const isValidRequestBody = function(requestBody) {
 const isValidObjectId = function(objectId) {
         return mongoose.Types.ObjectId.isValid(objectId)
     }
-    // Api 1    **  *************** Create book **************
+    // Api 3    **  *************** Create book **************
 
 const createbook = async function(req, res) {
     try {
         let id = req.body.userId
-        let decodedId = req.decodedtoken.userId
+        let decodedId = req.decodedtoken
         if (id == decodedId) {
             const requestBody = req.body;
             if (!isValidRequestBody(requestBody)) {
@@ -72,7 +72,11 @@ const createbook = async function(req, res) {
                 res.status(400).send({ status: false, message: "releasedAt is required" })
                 return
             }
-
+            if (!(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/.test(releasedAt))) {
+                res.status(400).send({ status: false, message: `${releasedAt} is invalid format, please enter date in YYYY-MM-DD format` })
+                return
+            }
+            //^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
 
             const isUserExist = await userModel.findOne({ userId })
 
@@ -94,6 +98,39 @@ const createbook = async function(req, res) {
     }
 }
 
+//API 4- Get Books
+
+const getBooksByFilter = async function(req, res) {
+    try {
+        const filterQuery = { isDeleted: false, deletedAt: null }
+        const queryParams = req.query
+
+        if (isValidRequestBody(queryParams)) {
+            const { userId, category, subcategory } = queryParams
 
 
-module.exports = { createbook }
+            if (isValid(userId) && isValidObjectId(userId)) {
+                filterQuery['userId'] = userId
+            }
+
+            if (isValid(category)) {
+                filterQuery['category'] = category.trim()
+            }
+
+            if (isValid(subcategory)) {
+                filterQuery['subcategory'] = subcategory.trim()
+            }
+
+        }
+        const books = await bookModel.find(filterQuery)
+
+        if (Array.isArray(books) && books.length === 0) {
+            res.status(404).send({ status: false, message: 'No books found which matches the filters' })
+            return
+        }
+        res.status(200).send({ status: true, message: 'Book List', data: books })
+    } catch (error) {
+        res.status(500).send({ Status: false, Message: error.message })
+    }
+}
+module.exports = { createbook, getBooksByFilter }

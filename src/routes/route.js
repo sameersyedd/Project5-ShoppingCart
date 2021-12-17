@@ -9,3 +9,4 @@ module.exports = router;
 router.post("/register", userController.registerUser)
 router.post("/login", userController.loginUser)
 router.post("/createbook", mid.userAuth, bookController.createbook)
+router.get("/books", bookController.getBooksByFilter)
