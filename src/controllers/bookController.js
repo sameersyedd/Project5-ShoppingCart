@@ -122,15 +122,92 @@ const getBooksByFilter = async function(req, res) {
             }
 
         }
-        const books = await bookModel.find(filterQuery)
+        const books = await bookModel.find(filterQuery).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 }).sort({ title: 1 })
 
         if (Array.isArray(books) && books.length === 0) {
             res.status(404).send({ status: false, message: 'No books found which matches the filters' })
             return
         }
+        // const sortBooks = books.sort(function(a, b) { return a.title - b.title }) // Sorting a-z
+
         res.status(200).send({ status: true, message: 'Book List', data: books })
+
     } catch (error) {
         res.status(500).send({ Status: false, Message: error.message })
     }
 }
-module.exports = { createbook, getBooksByFilter }
+
+//API 6 Update books by ID (PUT Books)
+const updateBookWithNewFeatures = async function(req, res) {
+    try {
+        let requestBody = req.body
+        let bookId = req.params.bookId
+        let unchangedBook = await bookModel.find({ _id: bookId }).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 })
+        let fliterForUpdate = { _id: bookId, userId: req.decodedtoken, isDeleted: false }
+
+        if (!isValidRequestBody(requestBody)) {
+            res.status(200).send({ Message: "No updates applied, book data is unchanged", data: unchangedBook })
+        }
+
+        let { title, excerpt, releasedAt, ISBN } = requestBody
+
+        if (title) {
+            if (!isValid(title)) {
+                return res.status(400).send({ status: false, message: 'Please provide a valid title' })
+            }
+        }
+
+        if (excerpt) {
+            if (!isValid(excerpt)) {
+                return res.status(400).send({ status: false, message: 'Please provide a valid excerpt' })
+            }
+        }
+
+        if (ISBN) {
+            if (!isValid(ISBN)) {
+                return res.status(400).send({ status: false, message: 'Please provide a valid ISBN' })
+            }
+        }
+
+        if (releasedAt) {
+            if (!isValid(releasedAt)) {
+                return res.status(400).send({ status: false, message: 'Please provide a valid release date' })
+            }
+
+            if (!(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/.test(releasedAt))) {
+                res.status(400).send({ status: false, message: `${releasedAt} is invalid format, please enter date in YYYY-MM-DD format` })
+                return
+            }
+        }
+
+        let updatedBookData = await bookModel.findOneAndUpdate(fliterForUpdate, requestBody, { new: true }).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 })
+
+        if (updatedBookData) {
+            res.status(201).send({ status: true, message: "Book updated successfully", data: updatedBookData })
+            return
+        } else {
+            res.status(201).send({ status: false, message: "Either your book is deleted or you are not an authorized user" })
+        }
+    } catch (error) {
+        return res.status(500).send({ status: false, msg: error.message });
+    }
+};
+
+//API 7 - Delete books by ID
+
+let deleteBookById = async function(req, res) {
+    try {
+        let bookId = req.params.bookId
+        let filterForDelete = { _id: bookId, userId: req.decodedtoken, isDeleted: false }
+        let deletedBook = await bookModel.findOneAndUpdate(filterForDelete, { isDeleted: true, deletedAt: new Date() }, { new: true })
+        if (deletedBook) {
+            res.status(200).send({ status: true, Message: "Book deleted successfully", data: deletedBook })
+        } else {
+            res.status(400).send({ status: false, message: "Cannot find book!, book is deleted already or you are not an authorized user to delete this book" })
+        }
+    } catch (error) {
+        res.status(500).send({ status: false, msg: error.message })
+    }
+}
+
+module.exports = { createbook, getBooksByFilter, updateBookWithNewFeatures, deleteBookById }
