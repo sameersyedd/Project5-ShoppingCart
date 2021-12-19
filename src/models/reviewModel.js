@@ -16,7 +16,8 @@ const reviewSchema = new mongoose.Schema({
     },
     reviewedAt: {
         type: Date,
-        required: true
+        required: true,
+        default: new Date()
     },
     rating: {
         type: Number,
@@ -27,6 +28,10 @@ const reviewSchema = new mongoose.Schema({
     review: {
         type: String,
         trim: true
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 
