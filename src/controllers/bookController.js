@@ -26,7 +26,7 @@ const createbook = async function(req, res) {
                 res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide book details" })
                 return
             }
-            let { title, excerpt, userId, ISBN, category, subcategory, reviews, releasedAt } = requestBody
+            let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = requestBody
             //validation start
             if (!isValid(title)) {
                 res.status(400).send({ status: false, msg: "tilte is required" })
@@ -76,6 +76,8 @@ const createbook = async function(req, res) {
                 res.status(400).send({ status: false, message: `${releasedAt} is invalid format, please enter date in YYYY-MM-DD format` })
                 return
             }
+
+
             //^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
 
             const isUserExist = await userModel.findOne({ userId })
@@ -85,9 +87,10 @@ const createbook = async function(req, res) {
             }
 
             requestBody.releasedAt = new Date(requestBody.releasedAt)
-
-            const bookDetails = await bookModel.create(requestBody)
-            res.status(201).send({ status: true, message: "Success", data: bookDetails })
+            const reviews = 0
+            const bookDetails = { title, excerpt, userId, ISBN, category, subcategory, reviews, releasedAt }
+            const createBook = await bookModel.create(bookDetails)
+            res.status(201).send({ status: true, message: "Success", data: createBook })
         } else {
             res.status(400).send({ status: false, message: "Unauthorized access, Invalid User Id" })
         }
