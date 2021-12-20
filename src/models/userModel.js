@@ -37,14 +37,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 8,
         maxlength: 15,
-        // validate: {
-        //     validator: function(password) {
-        //         return /^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[a-zA-Z!#$%&? "])[a-zA-Z0-9!#$%&?]{8,15}$/.test(password)
-        //     },
-        //     message: 'Please enter a vaild password',
-        //     isAsync: false
-        // },
-        // trim: true
     },
     address: {
         street: {
