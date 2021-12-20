@@ -174,7 +174,7 @@ const deleteReview = async function(req, res) {
             return res.status(400).send({ status: false, Message: "Please provide BookId and Review ID" })
         }
 
-        let deletedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId }, { isDeleted: true }, { new: true })
+        let deletedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId }, { isDeleted: true , deletedAt: new Date() }, { new: true })
 
         if (deletedReviewData) {
             const updateBookReviewCount = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $inc: { reviews: -1 } })
