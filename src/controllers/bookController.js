@@ -145,7 +145,7 @@ const getBooksByFilter = async function(req, res) {
 
 let getBooksByID = async function(req, res) {
     try {
-        const bookFromParams = req.params.bookId
+        const bookFromParams = req.params.bookId.trim()
 
         if (!isValidObjectId(bookFromParams)) {
             res.status(400).send({ status: false, Message: "Please provide a valid book id" })

@@ -13,10 +13,12 @@ router.post("/login", userController.loginUser)
 
 //Book Routes
 router.post("/createbook", mid.userAuth, bookController.createbook)
-router.get("/books", bookController.getBooksByFilter)
-router.get("/books/:bookId", bookController.getBooksByID)
+router.get("/books", mid.userAuth, bookController.getBooksByFilter)
+router.get("/books/:bookId", mid.userAuth, bookController.getBooksByID)
 router.put("/books/:bookId", mid.userAuth, bookController.updateBookWithNewFeatures)
 router.delete("/books/:bookId", mid.userAuth, bookController.deleteBookById)
 
 //Review Routes
 router.post("/books/:bookId/review", reviewController.newReview)
+router.put("/books/:bookId/review/:reviewId", reviewController.updateReview)
+router.delete("/books/:bookId/review/:reviewId", reviewController.deleteReview)
