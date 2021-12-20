@@ -1,6 +1,7 @@
 const userModel = require('../models/userModel')
 const bookModel = require('../models/bookModel')
 const mongoose = require('mongoose')
+const reviewModel = require('../models/reviewModel')
 const isValid = function(value) {
     if (typeof value === 'undefined' || value === null) return false
     if (typeof value === 'string' && value.trim().length === 0) return false
@@ -125,7 +126,7 @@ const getBooksByFilter = async function(req, res) {
             }
 
         }
-        const books = await bookModel.find(filterQuery).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 }).sort({ title: 1 })
+        const books = await bookModel.find(filterQuery).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, subcategory: 1, releasedAt: 1, reviews: 1 }).sort({ title: 1 })
 
         if (Array.isArray(books) && books.length === 0) {
             res.status(404).send({ status: false, message: 'No books found which matches the filters' })
@@ -137,6 +138,47 @@ const getBooksByFilter = async function(req, res) {
 
     } catch (error) {
         res.status(500).send({ Status: false, Message: error.message })
+    }
+}
+
+//API 5 - get books by ID along with reviews
+
+let getBooksByID = async function(req, res) {
+    try {
+        const bookFromParams = req.params.bookId
+
+        if (!isValidObjectId(bookFromParams)) {
+            res.status(400).send({ status: false, Message: "Please provide a valid book id" })
+        }
+
+        if (bookFromParams) {
+            let Book = await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })
+            if (!Book) {
+                res.status(404).send({ status: false, msg: 'Book not found ' })
+            } else {
+                let bookData = {
+                    bookId: Book._id,
+                    title: Book.title,
+                    excerpt: Book.excerpt,
+                    userId: Book.userId,
+                    category: Book.category,
+                    subcategory: Book.subcategory,
+                    reviews: Book.reviews,
+                    deletedAt: "",
+                    reviewsData: []
+                }
+                let reviewsData = await reviewModel.find({ bookId: Book._id, isDeleted: false }, '-bookId -isDeleted  -releasedAt -createdAt -updatedAt -__v')
+                    // console.log(reviewsData)
+                if (reviewsData) {
+                    bookData.reviewsData = reviewsData
+                }
+                res.status(201).send({ status: true, data: bookData })
+            }
+        } else {
+            res.status(400).send({ status: false, msg: "BookID must be present in the request parameters" })
+        }
+    } catch (error) {
+        res.status(500).send({ staus: false, msg: error.message })
     }
 }
 
@@ -213,4 +255,4 @@ let deleteBookById = async function(req, res) {
     }
 }
 
-module.exports = { createbook, getBooksByFilter, updateBookWithNewFeatures, deleteBookById }
+module.exports = { createbook, getBooksByFilter, getBooksByID, updateBookWithNewFeatures, deleteBookById }

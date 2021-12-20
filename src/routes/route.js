@@ -14,6 +14,7 @@ router.post("/login", userController.loginUser)
 //Book Routes
 router.post("/createbook", mid.userAuth, bookController.createbook)
 router.get("/books", bookController.getBooksByFilter)
+router.get("/books/:bookId", bookController.getBooksByID)
 router.put("/books/:bookId", mid.userAuth, bookController.updateBookWithNewFeatures)
 router.delete("/books/:bookId", mid.userAuth, bookController.deleteBookById)
 
