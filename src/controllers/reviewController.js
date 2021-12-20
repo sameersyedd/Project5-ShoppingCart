@@ -124,7 +124,7 @@ const updateReview = async function(req, res) {
                 return res.status(400).send({ status: false, message: 'Please provide a valid reviewer name' })
             }
         }
-        let updatedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId }, requestBody, { new: true })
+        let updatedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId, isDeleted: false }, requestBody, { new: true })
         if (updatedReviewData) {
             // let bookData = await bookModel.findOne({ _id: bookId, isDeleted: false });
             let book = await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })
