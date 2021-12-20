@@ -138,8 +138,8 @@ const updateReview = async function(req, res) {
                     deletedAt: "",
                     reviewsData: []
                 }
-                let reviewData = await reviewModel.find({ bookId: bookId, isDeleted: false })
-                bookData.reviewData = reviewData
+                let reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1})
+                bookData.reviewsData = reviewsData
                 res.status(201).send({ status: true, message: "Review updated successfully", data: bookData })
                 return
             }
