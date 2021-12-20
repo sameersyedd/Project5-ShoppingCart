@@ -13,9 +13,10 @@ const isValidRequestBody = function(requestBody) {
 }
 
 const isValidObjectId = function(objectId) {
-        return mongoose.Types.ObjectId.isValid(objectId)
-    }
-    // Api 3    **  *************** Create book **************
+    return mongoose.Types.ObjectId.isValid(objectId)
+}
+
+// Api 3    **  *************** Create book **************
 
 const createbook = async function(req, res) {
     try {
