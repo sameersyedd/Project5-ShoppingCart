@@ -242,7 +242,12 @@ const updateBookWithNewFeatures = async function(req, res) {
 
 let deleteBookById = async function(req, res) {
     try {
-        let bookId = req.params.bookId
+        let bookId = req.params.bookId.trim()
+
+        if (!isValidObjectId(bookId)) {
+            res.status(400).send({ status: false, Message: "Please provide a valid book id" })
+        }
+
         let filterForDelete = { _id: bookId, userId: req.decodedtoken, isDeleted: false }
         let deletedBook = await bookModel.findOneAndUpdate(filterForDelete, { isDeleted: true, deletedAt: new Date() }, { new: true })
         if (deletedBook) {

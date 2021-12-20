@@ -91,8 +91,8 @@ const newReview = async function(req, res) {
 const updateReview = async function(req, res) {
     try {
         let requestBody = req.body
-        let bookId = req.params.bookId
-        let reviewId = req.params.reviewId
+        let bookId = req.params.bookId.trim()
+        let reviewId = req.params.reviewId.trim()
         let findBook = await bookModel.find({ _id: bookId, isDeleted: false })
         let findReview = await reviewModel.find({ _id: reviewId, isDeleted: false })
 
@@ -106,7 +106,9 @@ const updateReview = async function(req, res) {
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ Message: "plz provide valid review data for update" })
         }
+
         let { review, rating, reviewedBy } = requestBody
+
         if (review) {
             if (!isValid(review)) {
                 return res.status(400).send({ status: false, message: 'Please provide a valid review' })
@@ -135,10 +137,9 @@ const updateReview = async function(req, res) {
                     category: book.category,
                     subcategory: book.subcategory,
                     reviews: book.reviews,
-                    deletedAt: "",
                     reviewsData: []
                 }
-                let reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1})
+                let reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 })
                 bookData.reviewsData = reviewsData
                 res.status(201).send({ status: true, message: "Review updated successfully", data: bookData })
                 return
@@ -173,7 +174,7 @@ const deleteReview = async function(req, res) {
             return res.status(400).send({ status: false, Message: "Please provide BookId and Review ID" })
         }
 
-        let deletedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId }, { isDeleted: true })
+        let deletedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId }, { isDeleted: true }, { new: true })
 
         if (deletedReviewData) {
             const updateBookReviewCount = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $inc: { reviews: -1 } })

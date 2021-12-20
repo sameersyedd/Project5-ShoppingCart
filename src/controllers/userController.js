@@ -15,9 +15,9 @@ const isValidRequestBody = function(requestBody) {
     return Object.keys(requestBody).length > 0
 }
 
-const isValidPassword =function(password){
-    if(password.length>7 && password.length<16 )
-    return true
+const isValidPassword = function(password) {
+    if (password.length > 7 && password.length < 16)
+        return true
 }
 
 
@@ -33,28 +33,29 @@ const registerUser = async function(req, res) {
         }
 
         // Extract params
-        const { title, name, phone, email, password, address } = requestBody; // Object destructing
+        let { title, name, phone, email, password, address } = requestBody; // Object destructing
         //Validation Starts
-        if (!isValidTitle(title)) {
-            res.status(400).send({ status: false, Message: "Please provide a vaild title" })
-            return
-        }
-
         if (!isValid(title)) {
             res.status(400).send({ status: false, Message: "Please provide title" })
             return
         }
-
-        if (!isValid(name.trim())) {
-            res.status(400).send({ status: false, Message: "Please provide a vaild name" })
+        if (!isValidTitle(title)) {
+            res.status(400).send({ status: false, Message: "Please provide a valid title" })
             return
         }
 
-        if (!isValid(phone.split(' ').join(''))) {
+        if (!isValid(name)) {
+            res.status(400).send({ status: false, Message: "Please provide a name" })
+            return
+        }
+        name = name.trim()
+
+        if (!isValid(phone)) {
             res.status(400).send({ status: false, Message: "Please provide a vaild phone number" })
             return
         }
-        if (! (/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone.split(' ').join('')))) {
+
+        if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone.split(' ').join('')))) {
             res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
             return
         }
@@ -69,7 +70,7 @@ const registerUser = async function(req, res) {
         }
 
         if (!isValid(password)) {
-            res.status(400).send({ status: false, Message: "Please provide a vaild password" })
+            res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
         if (!isValidPassword(password)) {
@@ -82,23 +83,23 @@ const registerUser = async function(req, res) {
             res.status(400).send({ status: false, Message: "Please provide a vaild address" })
             return
         }
-        let Email=email.split(' ').join('')
-        const isEmailAlreadyUsed = await userModel.findOne({ email:Email }); // {email: email} object shorthand property
+        let Email = email.split(' ').join('')
+        const isEmailAlreadyUsed = await userModel.findOne({ email: Email }); // {email: email} object shorthand property
 
         if (isEmailAlreadyUsed) {
             res.status(400).send({ status: false, message: `${Email} email address is already registered` })
             return
         }
-       let Phone=phone.split(' ').join('')
-        const isPhoneAlreadyUsed = await userModel.findOne({phone:Phone });
+        let Phone = phone.split(' ').join('')
+        const isPhoneAlreadyUsed = await userModel.findOne({ phone: Phone });
 
         if (isPhoneAlreadyUsed) {
             res.status(400).send({ status: false, message: `${Phone}  phone is already registered` })
             return
         }
-        let FPhone=phone.split(' ').join('');
-        let FEmail=email.split(' ').join('')
-        const userData = { title, name, phone:FPhone, email:FEmail, password, address }
+        let FPhone = phone.split(' ').join('');
+        let FEmail = email.split(' ').join('')
+        const userData = { title, name, phone: FPhone, email: FEmail, password, address }
         const newUser = await userModel.create(userData);
 
         res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });
@@ -150,7 +151,7 @@ const loginUser = async function(req, res) {
         }, 'group1')
 
         res.header('x-api-key', token);
-        res.status(200).send({ status: true, message: `user login successfull`, data: { token } });
+        res.status(200).send({ status: true, message: `user login successfull` });
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
     }
