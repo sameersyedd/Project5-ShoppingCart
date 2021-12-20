@@ -93,7 +93,7 @@ const createbook = async function(req, res) {
             const createBook = await bookModel.create(bookDetails)
             res.status(201).send({ status: true, message: "Success", data: createBook })
         } else {
-            res.status(400).send({ status: false, message: "Unauthorized access, Invalid User Id" })
+            res.status(401).send({ status: false, message: "Unauthorized access, Invalid User Id" })
         }
     } catch (err) {
         console.log(err)
@@ -231,7 +231,7 @@ const updateBookWithNewFeatures = async function(req, res) {
             res.status(201).send({ status: true, message: "Book updated successfully", data: updatedBookData })
             return
         } else {
-            res.status(201).send({ status: false, message: "Either your book is deleted or you are not an authorized user" })
+            res.status(401).send({ status: false, message: "Either your book is deleted or you are not an authorized user" })
         }
     } catch (error) {
         return res.status(500).send({ status: false, msg: error.message });

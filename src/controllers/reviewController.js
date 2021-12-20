@@ -80,7 +80,7 @@ const newReview = async function(req, res) {
                 const updatedBook = await bookModel.findOneAndUpdate({ _id: idFromParams, isDeleted: false }, { $inc: { reviews: 1 } })
                 res.status(201).send({ status: true, Message: "New review created successfully", data: createReview })
             } else {
-                res.status(400).send({ status: false, Message: "Can't find book!, book doesn't exists or is deleted" })
+                res.status(404).send({ status: false, Message: "Can't find book!, book doesn't exists or is deleted" })
             }
 
         } catch (error) {
@@ -145,7 +145,7 @@ const updateReview = async function(req, res) {
                 return
             }
         } else {
-            res.status(201).send({ status: false, message: "Either your book is deleted or your review is not present" })
+            res.status(404).send({ status: false, message: "Either your book is deleted or your review is not present" })
         }
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
@@ -174,13 +174,13 @@ const deleteReview = async function(req, res) {
             return res.status(400).send({ status: false, Message: "Please provide BookId and Review ID" })
         }
 
-        let deletedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId }, { isDeleted: true }, { new: true })
+        let deletedReviewData = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true })
 
         if (deletedReviewData) {
             const updateBookReviewCount = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $inc: { reviews: -1 } })
             res.status(200).send({ Message: "Review is Deleted", data: deletedReviewData })
         } else {
-            res.status(201).send({ status: false, message: "Either your book is already deleted or your review is not present" })
+            res.status(404).send({ status: false, message: "Book not present or review already deleted" })
         }
 
     } catch (error) {
