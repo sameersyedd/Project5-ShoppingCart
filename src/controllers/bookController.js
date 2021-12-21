@@ -2,6 +2,8 @@ const userModel = require('../models/userModel')
 const bookModel = require('../models/bookModel')
 const mongoose = require('mongoose')
 const reviewModel = require('../models/reviewModel')
+const isValidUrl = require("url-validation")
+
 const isValid = function(value) {
     if (typeof value === 'undefined' || value === null) return false
     if (typeof value === 'string' && value.trim().length === 0) return false
@@ -28,7 +30,7 @@ const createbook = async function(req, res) {
                 res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide book details" })
                 return
             }
-            let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = requestBody
+            let { title, excerpt, bookCover, userId, ISBN, category, subcategory, releasedAt } = requestBody
             //validation start
             if (!isValid(title)) {
                 res.status(400).send({ status: false, msg: "tilte is required" })
@@ -42,6 +44,14 @@ const createbook = async function(req, res) {
             if (!isValid(excerpt)) {
                 res.status(400).send({ status: false, msg: "excerpt is required" })
                 return
+            }
+            if (!isValid(bookCover)) {
+                res.status(400).send({ status: false, msg: "bookCover URL is required" })
+                return
+            }
+
+            if (!isValidUrl(bookCover.trim())) {
+                return res.status(400).send({ status: false, Message: "book cover URL is not valid, please provide a valid url" })
             }
             if (!isValid(userId)) {
                 res.status(400).send({ status: false, msg: "userId is required" })
@@ -90,7 +100,7 @@ const createbook = async function(req, res) {
 
             requestBody.releasedAt = new Date(requestBody.releasedAt)
             const reviews = 0
-            const bookDetails = { title, excerpt, userId, ISBN, category, subcategory, reviews, releasedAt }
+            const bookDetails = { title, excerpt, userId, ISBN, bookCover, category, subcategory, reviews, releasedAt }
             const createBook = await bookModel.create(bookDetails)
             res.status(201).send({ status: true, message: "Success", data: createBook })
         } else {
