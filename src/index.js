@@ -12,7 +12,7 @@ app.use(multer().any())
 
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb+srv://users-open-to-all:hiPassword123@cluster0.uh35t.mongodb.net/Group-1(BookManagement)?retryWrites=true&w=majority", { useNewUrlParser: true })
+mongoose.connect("mongodb+srv://users-open-to-all:hiPassword123@cluster0.uh35t.mongodb.net/group7Database(Shopping)?retryWrites=true&w=majority", { useNewUrlParser: true })
     .then(() => console.log('mongodb running and connected'))
     .catch(err => console.log(err))
 

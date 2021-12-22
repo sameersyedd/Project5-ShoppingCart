@@ -1,14 +1,12 @@
+const { prototype } = require('aws-sdk/clients/acm')
 const jwt = require('jsonwebtoken')
 const userModel = require('../models/userModel')
+const bcrypt = require('bcrypt')
 
 const isValid = function(value) {
     if (typeof value === 'undefined' || value === null) return false
     if (typeof value === 'string' && value.trim().length === 0) return false
     return true;
-}
-
-const isValidTitle = function(title) {
-    return ['Mr', 'Mrs', 'Miss'].indexOf(title) !== -1
 }
 
 const isValidRequestBody = function(requestBody) {
@@ -33,22 +31,19 @@ const registerUser = async function(req, res) {
         }
 
         // Extract params
-        let { title, name, phone, email, password, address } = requestBody; // Object destructing
+        let { fname, lname, email, profileImage, phone, password, address } = requestBody; // Object destructing
         //Validation Starts
-        if (!isValid(title)) {
-            res.status(400).send({ status: false, Message: "Please provide title" })
+        if (!isValid(fname)) {
+            res.status(400).send({ status: false, Message: "Please provide first name" })
             return
         }
-        if (!isValidTitle(title)) {
-            res.status(400).send({ status: false, Message: "Please provide a valid title" })
-            return
-        }
+        fname = fname.trim()
 
-        if (!isValid(name)) {
-            res.status(400).send({ status: false, Message: "Please provide a name" })
+        if (!isValid(lname)) {
+            res.status(400).send({ status: false, Message: "Please provide last name" })
             return
         }
-        name = name.trim()
+        lname = lname.trim()
 
         if (!isValid(phone)) {
             res.status(400).send({ status: false, Message: "Please provide a vaild phone number" })
@@ -69,6 +64,20 @@ const registerUser = async function(req, res) {
             return
         }
 
+        if (!isValid(profileImage)) {
+            res.status(400).send({ status: false, Message: "Please provide profile image" })
+            return
+        }
+
+        profileImage = profileImage.trim()
+
+        let profile = /([a-z\-_0-9\/\:\.]*\.(jpg|jpeg|png|gif))/i
+
+        if (!profile.test(profileImage)) {
+            res.status(400).send({ status: false, message: `Please povide a valid URL for profile image` })
+            return
+        }
+
         if (!isValid(password)) {
             res.status(400).send({ status: false, Message: "Please provide password" })
             return
@@ -78,11 +87,21 @@ const registerUser = async function(req, res) {
             return
         }
 
-
         if (!isValid(address)) {
-            res.status(400).send({ status: false, Message: "Please provide a vaild address" })
+            res.status(400).send({ status: false, Message: "Please provide address" })
             return
         }
+
+        if (!isValid(address.shipping)) {
+            res.status(400).send({ status: false, Message: "Please provide shipping address" })
+            return
+        }
+
+        if (!isValid(address.billing)) {
+            res.status(400).send({ status: false, Message: "Please provide shipping address" })
+            return
+        }
+
         let Email = email.split(' ').join('')
         const isEmailAlreadyUsed = await userModel.findOne({ email: Email }); // {email: email} object shorthand property
 
@@ -97,9 +116,11 @@ const registerUser = async function(req, res) {
             res.status(400).send({ status: false, message: `${Phone}  phone is already registered` })
             return
         }
+        //  const encryptedPassword = await bcrypt.hash(password, saltRounds)
         let FPhone = phone.split(' ').join('');
         let FEmail = email.split(' ').join('')
-        const userData = { title, name, phone: FPhone, email: FEmail, password, address }
+        const userData = { fname, lname, phone: FPhone, email: FEmail, password, address, profileImage }
+
         const newUser = await userModel.create(userData);
 
         res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });
@@ -147,8 +168,8 @@ const loginUser = async function(req, res) {
         const token = await jwt.sign({
             userId: user._id,
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 60 * 30
-        }, 'group1')
+            exp: Math.floor(Date.now() / 1000) + 60 * 60
+        }, 'group7')
 
         res.header('x-api-key', token);
         res.status(200).send({ status: true, message: `user login successfull` });
