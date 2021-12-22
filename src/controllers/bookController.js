@@ -242,7 +242,7 @@ const updateBookWithNewFeatures = async function(req, res) {
             res.status(201).send({ status: true, message: "Book updated successfully", data: updatedBookData })
             return
         } else {
-            res.status(401).send({ status: false, message: "Either your book is deleted or you are not an authorized user" })
+            res.status(404).send({ status: false, message: "Either your book is deleted or you are not an authorized user" })
         }
     } catch (error) {
         return res.status(500).send({ status: false, msg: error.message });
@@ -264,7 +264,7 @@ let deleteBookById = async function(req, res) {
         if (deletedBook) {
             res.status(200).send({ status: true, Message: "Book deleted successfully", data: deletedBook })
         } else {
-            res.status(400).send({ status: false, message: "Cannot find book!, book is deleted already or you are not an authorized user to delete this book" })
+            res.status(404).send({ status: false, message: "Cannot find book!, book is deleted already or you are not an authorized user to delete this book" })
         }
     } catch (error) {
         res.status(500).send({ status: false, msg: error.message })
