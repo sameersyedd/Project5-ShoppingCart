@@ -1,4 +1,3 @@
-const { prototype } = require('aws-sdk/clients/acm')
 const jwt = require('jsonwebtoken')
 const userModel = require('../models/userModel')
 const bcrypt = require('bcrypt')
@@ -82,6 +81,9 @@ const registerUser = async function(req, res) {
             res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
+
+        const encryptedPassword = await bcrypt.hash(password, 10); //encrypting password using bcrypt
+
         if (!isValidPassword(password)) {
             res.status(400).send({ status: false, Message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
             return
@@ -116,10 +118,10 @@ const registerUser = async function(req, res) {
             res.status(400).send({ status: false, message: `${Phone}  phone is already registered` })
             return
         }
-        //  const encryptedPassword = await bcrypt.hash(password, saltRounds)
+
         let FPhone = phone.split(' ').join('');
         let FEmail = email.split(' ').join('')
-        const userData = { fname, lname, phone: FPhone, email: FEmail, password, address, profileImage }
+        const userData = { fname, lname, phone: FPhone, email: FEmail, password: encryptedPassword, address, profileImage }
 
         const newUser = await userModel.create(userData);
 
@@ -159,27 +161,29 @@ const loginUser = async function(req, res) {
             return
         }
 
-        const user = await userModel.findOne({ email, password });
+        const user = await userModel.findOne({ email });
 
         if (!user) {
-            res.status(401).send({ status: false, message: `Invalid login credentials` });
+            res.status(401).send({ status: false, message: `Invalid email, cannot find any user with ${email} email address` });
             return
         }
+
+        const matchPassword = await bcrypt.compareSync(password, user.password) //matching original and encrypted
+
+        if (!matchPassword) {
+            return res.status(401).send({ status: false, message: 'Password Incorrect' })
+        }
+
         const token = await jwt.sign({
             userId: user._id,
             iat: Math.floor(Date.now() / 1000),
             exp: Math.floor(Date.now() / 1000) + 60 * 60
         }, 'group7')
 
-        res.header('x-api-key', token);
-        res.status(200).send({ status: true, message: `user login successfull` });
+        res.status(200).send({ status: true, message: `user login successfull`, data: { token, userId: user._id } });
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
     }
 }
-
-
-
-
 
 module.exports = { registerUser, loginUser }
