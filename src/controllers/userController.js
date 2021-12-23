@@ -254,6 +254,7 @@ const loginUser = async function(req, res) {
         }, 'group7')
 
 
+
         res.status(200).send({ status: true, message: `user login successfull`, data: { token, userId: user._id } });
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
@@ -304,7 +305,8 @@ const updateUserProfile = async(req, res) => {
                 let updateProfile = await userModel.findOneAndUpdate({ _id: userId }, { fname: fname, lname: lname, email: email, password: password, profileImage: profileImage, address: address, phone }, { new: true });
                 res.status(200).send({ status: true, message: "user profile updated successfull", data: updateProfile, });
             } else {
-                res.status(400).send({ status: false, message: "Please provide profile image" })
+                let updateProfile = await userModel.findOneAndUpdate({ _id: userId }, { fname: fname, lname: lname, email: email, password: password, address: address, phone }, { new: true });
+                res.status(200).send({ status: true, message: "user profile updated successfull", data: updateProfile, });
             }
         } else {
             res.status(401).send({ status: false, Message: "Incorrect User ID, please provide correct user ID" })
