@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const userModel = require('../models/userModel')
 const bcrypt = require('bcrypt')
+const aws = require("aws-sdk");
 
 const isValid = function(value) {
     if (typeof value === 'undefined' || value === null) return false
@@ -17,6 +18,38 @@ const isValidPassword = function(password) {
         return true
 }
 
+// AWS Fileupload -----------------------------------------------------------
+aws.config.update({
+    accessKeyId: "AKIAY3L35MCRRMC6253G", // id
+    secretAccessKey: "88NOFLHQrap/1G2LqUy9YkFbFRe/GNERsCyKvTZA", // like your secret password
+    region: "ap-south-1", // Mumbai region
+});
+
+// this function uploads file to AWS and gives back the url for the file
+let uploadFile = async(file) => {
+    return new Promise(function(resolve, reject) {
+
+        // Create S3 service object
+        let s3 = new aws.S3({ apiVersion: "2006-03-01" });
+        var uploadParams = {
+            ACL: "public-read", // this file is publically readable
+            Bucket: "classroom-training-bucket",
+            Key: "Group7/" + file.originalname,
+            Body: file.buffer,
+        };
+
+        // Callback
+        s3.upload(uploadParams, function(err, data) {
+            if (err) {
+                return reject({ error: err });
+            }
+            console.log(data);
+            console.log(`File uploaded successfully. ${data.Location}`);
+            return resolve(data.Location);
+        });
+    });
+};
+
 
 //API 1 Register User =================================================================================================
 
@@ -30,7 +63,8 @@ const registerUser = async function(req, res) {
         }
 
         // Extract params
-        let { fname, lname, email, profileImage, phone, password, address } = requestBody; // Object destructing
+        let { fname, lname, email, phone, password, address } = requestBody;
+        // Object destructing
         //Validation Starts
         if (!isValid(fname)) {
             res.status(400).send({ status: false, Message: "Please provide first name" })
@@ -63,18 +97,18 @@ const registerUser = async function(req, res) {
             return
         }
 
-        if (!isValid(profileImage)) {
-            res.status(400).send({ status: false, Message: "Please provide profile image" })
-            return
-        }
+        // if (!isValid(profileImage)) {
+        //     res.status(400).send({ status: false, Message: "Please provide profile image" })
+        //     return
+        // }
 
-        profileImage = profileImage.trim()
+        // profileImage = profileImage.trim()
 
-        let jpgValid = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g //need to be replaced
-        if (!jpgValid.test(profileImage)) {
-            res.status(400).send({ status: false, message: `Please povide a valid URL for profile image` })
-            return
-        }
+        // let jpgValid = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g //need to be replaced
+        // if (!jpgValid.test(profileImage)) {
+        //     res.status(400).send({ status: false, message: `Please povide a valid URL for profile image` })
+        //     return
+        // }
 
         // let httpValid = /(:?^((https|http|HTTP|HTTPS){1}:\/\/)(([w]{3})[\.]{1})?([a-zA-Z0-9]{1,}[\.])[\w]*((\/){1}([\w@?^=%&amp;~+#-_.]+))*)$/
         // if (!httpValid.test(profileImage)) {
@@ -157,16 +191,18 @@ const registerUser = async function(req, res) {
 
         let FPhone = phone.split(' ').join('');
         let FEmail = email.split(' ').join('')
-        const userData = { fname, lname, phone: FPhone, email: FEmail, password: encryptedPassword, address, profileImage }
-
-        const newUser = await userModel.create(userData);
-
-        res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });
-
+        let files = req.files;
+        if (!(files && files.length > 0)) {
+            res.status(400).send({ status: false, msg: "Please upload profile image" });
+        } else {
+            const profileImage = await uploadFile(files[0])
+            const userData = { fname, lname, phone: FPhone, email: FEmail, password: encryptedPassword, address, profileImage: profileImage }
+            const newUser = await userModel.create(userData);
+            res.status(201).send({ status: true, message: `User registered successfully`, data: newUser });
+        }
     } catch (error) {
         res.status(500).send({ status: false, Message: error.message })
     }
-
 }
 
 //API 2 - Login User===================================================================================================
@@ -217,34 +253,57 @@ const loginUser = async function(req, res) {
         }, 'group7')
 
 
-
         res.status(200).send({ status: true, message: `user login successfull`, data: { token, userId: user._id } });
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
     }
 }
 
-//API 3 -Get User Details
+//API 3 -Get User Details===============================================================================
 
 const getUserDetail = async(req, res) => {
+
     try {
         const userId = req.params.userId
-            // console.log(userId)
-            // const IdFromToken = req.userId
-            // console.log(IdFromToken)
-            // if (userId == IdFromToken) {
-        const profileUser = await userModel.findOne({ _id: userId, isDeleted: false })
-        if (!profileUser) {
-            return res.status(404).send({ status: false, message: "user profile does not exist" });
+        const decodedId = req.userId
+        if (userId == decodedId) {
+            const profileUser = await userModel.findOne({ _id: userId, isDeleted: false })
+            if (!profileUser) {
+                return res.status(404).send({ status: false, message: "user profile does not exist" });
+            } else {
+                return res.status(200).send({ status: true, message: 'user profile details', data: profileUser })
+            }
+        } else {
+            res.status(401).send({ status: false, Message: "Incorrect User ID, please provide correct user ID" })
         }
-        const Data = await userModel.findOne({ userId: userId, isDeleted: false })
-        return res.status(200).send({ status: true, message: 'user profile details', data: Data })
-            // } else {
-            //     res.status(404).send({ status: false, Message: "User Not Found!!" })
-            // }
     } catch (error) {
         return res.status(500).send({ success: false, error: error.message });
     }
 }
 
-module.exports = { registerUser, loginUser, getUserDetail }
+//API 4 - Update USER Details=========================================================================
+
+const updateUserProfile = async(req, res) => {
+    try {
+        const userId = req.params.userId;
+        const requestBody = req.body;
+        const decodedId = req.userId
+        if (userId == decodedId) {
+            let { fname, lname, email, password, profileImage, address } = requestBody;
+
+            const salt = await bcrypt.genSalt(10);
+            password = await bcrypt.hash(password, salt);
+
+            let updateProfile = await userModel.findOneAndUpdate({ _id: userId }, { fname: fname, lname: lname, email: email, password: password, profileImage: profileImage, address: address, }, { new: true });
+
+            res.status(200).send({ status: true, message: "user profile updated successfull", data: updateProfile, });
+        } else {
+            res.status(401).send({ status: false, Message: "Incorrect User ID, please provide correct user ID" })
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).send({ status: false, msg: err.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, getUserDetail, updateUserProfile }
