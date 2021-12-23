@@ -66,6 +66,7 @@ const registerUser = async function(req, res) {
         let { fname, lname, email, phone, password, address } = requestBody;
         // Object destructing
         //Validation Starts
+
         if (!isValid(fname)) {
             res.status(400).send({ status: false, Message: "Please provide first name" })
             return
@@ -284,24 +285,32 @@ const getUserDetail = async(req, res) => {
 //API 4 - Update USER Details=========================================================================
 
 const updateUserProfile = async(req, res) => {
+
     try {
         const userId = req.params.userId;
         const requestBody = req.body;
         const decodedId = req.userId
         if (userId == decodedId) {
-            let { fname, lname, email, password, profileImage, address } = requestBody;
+            let { fname, lname, email, password, address, phone } = requestBody;
 
-            const salt = await bcrypt.genSalt(10);
-            password = await bcrypt.hash(password, salt);
+            if (password) {
+                const salt = await bcrypt.genSalt(10);
+                password = await bcrypt.hash(password, salt);
+            }
 
-            let updateProfile = await userModel.findOneAndUpdate({ _id: userId }, { fname: fname, lname: lname, email: email, password: password, profileImage: profileImage, address: address, }, { new: true });
-
-            res.status(200).send({ status: true, message: "user profile updated successfull", data: updateProfile, });
+            let files = req.files;
+            if ((files && files.length > 0)) {
+                const profileImage = await uploadFile(files[0])
+                let updateProfile = await userModel.findOneAndUpdate({ _id: userId }, { fname: fname, lname: lname, email: email, password: password, profileImage: profileImage, address: address, phone }, { new: true });
+                res.status(200).send({ status: true, message: "user profile updated successfull", data: updateProfile, });
+            } else {
+                res.status(400).send({ status: false, message: "Please provide profile image" })
+            }
         } else {
             res.status(401).send({ status: false, Message: "Incorrect User ID, please provide correct user ID" })
         }
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500).send({ status: false, msg: err.message });
     }
 };

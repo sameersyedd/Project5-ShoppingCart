@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const userAuth = async function(req, res, next) {
     let token = req.header('Authorization');
-    console.log(token)
+    //  console.log(token)
     if (!token) return res.status(401).send({ status: false, Message: "Access Denied, Token missing" });
     try {
         if (token.startsWith('Bearer')) {
