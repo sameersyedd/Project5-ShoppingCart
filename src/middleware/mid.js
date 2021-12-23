@@ -1,27 +1,18 @@
-const jwt = require('jsonwebtoken')
-
+const jwt = require("jsonwebtoken");
 const userAuth = async function(req, res, next) {
+    let token = req.header('Authorization');
+    console.log(token)
+    if (!token) return res.status(401).send({ status: false, Message: "Access Denied, Token missing" });
     try {
-        const token = req.header('Authorization')
-        console.log(token)
-        if (!token) {
-            res.status(403).send({ status: false, message: `Missing authentication token in request` })
-            return;
+        if (token.startsWith('Bearer')) {
+            // Remove Bearer from string
+            token = token.slice(6, token.length).trimLeft();
         }
-        const decoded = await jwt.verify(token, 'group1')
-
-
-        if (!decoded) {
-            res.status(403).send({ status: false, message: `Invalid authentication token in request` })
-            return;
-        }
-
-        req.decodedtoken = decoded.userId;
-
-        next()
-    } catch (error) {
-        console.error(`Error! ${error.message}`)
-        res.status(500).send({ status: false, message: error.message })
+        const verified = jwt.verify(token, "group7");
+        req.userId = verified.userId;
+        next();
+    } catch (err) {
+        res.status(400).send("Invalid Token");
     }
 }
 

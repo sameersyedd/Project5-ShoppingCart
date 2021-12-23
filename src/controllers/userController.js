@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 
 const isValid = function(value) {
     if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
+    if (typeof value === "string" && value.trim().length === 0) return false
     return true;
 }
 
@@ -70,12 +70,17 @@ const registerUser = async function(req, res) {
 
         profileImage = profileImage.trim()
 
-        let profile = /([a-z\-_0-9\/\:\.]*\.(jpg|jpeg|png|gif))/i
-
-        if (!profile.test(profileImage)) {
+        let jpgValid = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g //need to be replaced
+        if (!jpgValid.test(profileImage)) {
             res.status(400).send({ status: false, message: `Please povide a valid URL for profile image` })
             return
         }
+
+        // let httpValid = /(:?^((https|http|HTTP|HTTPS){1}:\/\/)(([w]{3})[\.]{1})?([a-zA-Z0-9]{1,}[\.])[\w]*((\/){1}([\w@?^=%&amp;~+#-_.]+))*)$/
+        // if (!httpValid.test(profileImage)) {
+        //     res.status(400).send({ status: false, message: `Please povide a valid URL for profile image` })
+        //     return
+        // }
 
         if (!isValid(password)) {
             res.status(400).send({ status: false, Message: "Please provide password" })
@@ -99,8 +104,39 @@ const registerUser = async function(req, res) {
             return
         }
 
+        if (!isValid(address.shipping.street)) {
+            res.status(400).send({ status: false, Message: "Please provide shipping street name" })
+            return
+        }
+
+        if (!isValid(address.shipping.city)) {
+            res.status(400).send({ status: false, Message: "Please provide shipping city" })
+            return
+        }
+
+        if (!isValid(address.shipping.pincode)) {
+            res.status(400).send({ status: false, Message: "Please provide shipping pincode" })
+            return
+        }
+
+
         if (!isValid(address.billing)) {
-            res.status(400).send({ status: false, Message: "Please provide shipping address" })
+            res.status(400).send({ status: false, Message: "Please provide billing address" })
+            return
+        }
+
+        if (!isValid(address.billing.street)) {
+            res.status(400).send({ status: false, Message: "Please provide billing street" })
+            return
+        }
+
+        if (!isValid(address.billing.city)) {
+            res.status(400).send({ status: false, Message: "Please provide billing city" })
+            return
+        }
+
+        if (!isValid(address.billing.pincode)) {
+            res.status(400).send({ status: false, Message: "Please provide billing pincode" })
             return
         }
 
@@ -177,8 +213,10 @@ const loginUser = async function(req, res) {
         const token = await jwt.sign({
             userId: user._id,
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 60 * 60
+            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 12
         }, 'group7')
+
+
 
         res.status(200).send({ status: true, message: `user login successfull`, data: { token, userId: user._id } });
     } catch (error) {
@@ -186,4 +224,27 @@ const loginUser = async function(req, res) {
     }
 }
 
-module.exports = { registerUser, loginUser }
+//API 3 -Get User Details
+
+const getUserDetail = async(req, res) => {
+    try {
+        const userId = req.params.userId
+            // console.log(userId)
+            // const IdFromToken = req.userId
+            // console.log(IdFromToken)
+            // if (userId == IdFromToken) {
+        const profileUser = await userModel.findOne({ _id: userId, isDeleted: false })
+        if (!profileUser) {
+            return res.status(404).send({ status: false, message: "user profile does not exist" });
+        }
+        const Data = await userModel.findOne({ userId: userId, isDeleted: false })
+        return res.status(200).send({ status: true, message: 'user profile details', data: Data })
+            // } else {
+            //     res.status(404).send({ status: false, Message: "User Not Found!!" })
+            // }
+    } catch (error) {
+        return res.status(500).send({ success: false, error: error.message });
+    }
+}
+
+module.exports = { registerUser, loginUser, getUserDetail }
