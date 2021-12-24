@@ -306,6 +306,78 @@ const updateUserProfile = async(req, res) => {
     }
 };
 
+// const updateUserProfile = async(req, res) => {
+//     try {
+//         const userId = req.params.userId;
+//         const requestBody = req.body;
+//         let files=req.files
+//         const decodedId = req.userId
+//         if (userId == decodedId) {
+//             if(files && files.length > 0 && (!isValidRequestBody(requestBody))){
+//                 const profileImage = await uploadFile(files[0])
+//                 let updateProfile = await userModel.findOneAndUpdate({ _id: userId }, { profileImage: profileImage }, { new: true });
+
+//                 res.status(200).send({ status: true, message: "user profile updated successfull", data: updateProfile, });
+//             }else{
+//             if (!isValidRequestBody(requestBody)) {
+//                 res.status(400).send({ status: false, Message: "no data to update" })
+//                 return
+//             }
+//             let { fname, lname, email, password, address } = requestBody;
+
+            
+//             if(fname==false){
+//                 return res.status(400).send({status:false,message:"fname is null"});
+//             }
+//             if(lname==false){
+//                 return res.status(400).send({status:false,message:"lname is null"});
+//             }
+//             if(email==false){
+//                return res.status(400).send({status:false,message:"email is null"})
+//             }else{if(email==true){
+//                 if(!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email))){
+//                     return res.status(400).send({status:false,message:"email is not velid"})
+//                 }
+//             }
+//             }
+//             if(password){
+//             if(password==false){
+//                 return res.status(400).send({status:false,message:"password is null"})
+           
+//             }else{
+//                if(!(/^[a-zA-Z0-9!@#$%^&*]{8,16}$/.test(password))){
+//                    return res.status(400).send({status:false,message:"password is not valid"})
+//                }else{
+//                 const salt = await bcrypt.genSalt(10);
+//                 password = await bcrypt.hash(password, salt);
+//                }
+//             }
+//         }
+//             if(files==false){
+//                 return res.ststus(400).send({status:false,message:"filse is null"})
+//             }else{
+                
+//             }
+//             if(address==false){
+//                     return res.status(400).send({status:false,message:"address is null"})
+//             }
+//             const profileImage = await uploadFile(files[0])
+//             let updateProfile = await userModel.findOneAndUpdate({ _id: userId }, { fname: fname, lname: lname, email: email, password: password, profileImage: profileImage, address: address, }, { new: true });
+
+//             res.status(200).send({ status: true, message: "user profile updated successfull", data: updateProfile, });
+//         }
+        
+//         }else {
+//             res.status(401).send({ status: false, Message: "Incorrect User ID, please provide correct user ID" })
+//         }
+    
+    
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send({ status: false, msg: err.message });
+//     }
+// };
+
 
 
 module.exports = { registerUser, loginUser, getUserDetail, updateUserProfile }
