@@ -7,13 +7,13 @@ const userAuth = async function(req, res, next) {
         if (token.startsWith('Bearer')) {
             // Remove Bearer from string
             token = token.slice(6, token.length).trimLeft();
-            console.log(token)
+            // console.log(token)
         }
         const verified = jwt.verify(token, "group7");
         req.userId = verified.userId;
         next();
     } catch (err) {
-        res.status(400).send("Invalid Token");
+        res.status(400).send({ status: false, Message: "Invalid Token!!" });
     }
 }
 module.exports = { userAuth }

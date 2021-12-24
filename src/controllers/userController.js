@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const userModel = require('../models/userModel')
 const bcrypt = require('bcrypt')
 const aws = require("aws-sdk");
+const mongoose = require("mongoose")
 
 const isValid = function(value) {
     if (typeof value === 'undefined' || value === null) return false
@@ -16,6 +17,10 @@ const isValidRequestBody = function(requestBody) {
 const isValidPassword = function(password) {
     if (password.length > 7 && password.length < 16)
         return true
+}
+
+const isValidObjectId = function(objectId) {
+    return mongoose.Types.ObjectId.isValid(objectId)
 }
 
 // AWS Fileupload -----------------------------------------------------------
@@ -97,25 +102,6 @@ const registerUser = async function(req, res) {
             res.status(400).send({ status: false, message: `Email should be a valid email address` })
             return
         }
-
-        // if (!isValid(profileImage)) {
-        //     res.status(400).send({ status: false, Message: "Please provide profile image" })
-        //     return
-        // }
-
-        // profileImage = profileImage.trim()
-
-        // let jpgValid = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g //need to be replaced
-        // if (!jpgValid.test(profileImage)) {
-        //     res.status(400).send({ status: false, message: `Please povide a valid URL for profile image` })
-        //     return
-        // }
-
-        // let httpValid = /(:?^((https|http|HTTP|HTTPS){1}:\/\/)(([w]{3})[\.]{1})?([a-zA-Z0-9]{1,}[\.])[\w]*((\/){1}([\w@?^=%&amp;~+#-_.]+))*)$/
-        // if (!httpValid.test(profileImage)) {
-        //     res.status(400).send({ status: false, message: `Please povide a valid URL for profile image` })
-        //     return
-        // }
 
         if (!isValid(password)) {
             res.status(400).send({ status: false, Message: "Please provide password" })
@@ -291,6 +277,9 @@ const updateUserProfile = async(req, res) => {
         const userId = req.params.userId;
         const requestBody = req.body;
         const decodedId = req.userId
+        if (!isValidRequestBody) {
+            res.status(200).send({ status: true, Message: "No data updated, details unchanged" })
+        }
         if (userId == decodedId) {
             let { fname, lname, email, password, address, phone } = requestBody;
 
@@ -316,5 +305,7 @@ const updateUserProfile = async(req, res) => {
         res.status(500).send({ status: false, msg: err.message });
     }
 };
+
+
 
 module.exports = { registerUser, loginUser, getUserDetail, updateUserProfile }
