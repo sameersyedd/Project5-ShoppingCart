@@ -239,8 +239,6 @@ const loginUser = async function(req, res) {
             exp: Math.floor(Date.now() / 1000) + 60 * 60 * 12
         }, 'group7')
 
-
-
         res.status(200).send({ status: true, message: `user login successfull`, data: { token, userId: user._id } });
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
@@ -283,9 +281,18 @@ const updateUserProfile = async(req, res) => {
         if (userId == decodedId) {
             let { fname, lname, email, password, address, phone } = requestBody;
 
+
+            if (!isValid(fname)) {
+                res.status(400).send({ status: false, Message: "Please provide a valid fname" })
+            }
+
+            if (!isValid(lname)) {
+                res.status(400).send({ status: false, Message: "Please provide a valid lname" })
+            }
+
+
             if (password) {
-                const salt = await bcrypt.genSalt(10);
-                password = await bcrypt.hash(password, salt);
+                password = await bcrypt.hash(password, 10);
             }
 
             let files = req.files;
@@ -305,5 +312,7 @@ const updateUserProfile = async(req, res) => {
         res.status(500).send({ status: false, msg: err.message });
     }
 };
+
+
 
 module.exports = { registerUser, loginUser, getUserDetail, updateUserProfile }
