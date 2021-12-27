@@ -158,22 +158,28 @@ const productByQuery = async function(req, res) {
 
     try {
         let saveQuery = req.query;
-        const { size, name, priceGT, priceLT } = saveQuery;
-        if (size || name || priceGT || priceLT) {
-            let body = {};
+        let { size, name, priceGreaterThan, priceLessThan } = saveQuery;
+        if (size || name || priceGreaterThan || priceLessThan) {
+            let body = { isDeleted: false };
             body.isDeleted = false
+
             if (size) {
                 body.availableSizes = size
             }
+
             if (name) {
-                body.title = name
+                name = name.trim()
+                body.title = { $regex: name, $options: "$in" }
             }
-            if (priceGT) {
-                body.price = { $gt: priceGT }
+
+            if (priceGreaterThan) {
+                body.price = { $gt: priceGreaterThan }
             }
-            if (priceLT) {
-                body.price = { $lt: priceLT }
+
+            if (priceLessThan) {
+                body.price = { $lt: priceLessThan }
             }
+
             let getProduct = await productModel.find(body).sort({ price: 1 })
             if (!(getProduct.length > 0)) {
                 return res.status(404).send({ status: false, message: " There is no such product, please valid query ", });
