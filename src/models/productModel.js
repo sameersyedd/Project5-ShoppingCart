@@ -31,10 +31,15 @@ const productSchema = new mongoose.Schema({
         required: true
     }, // s3 link
     style: String,
-    availableSizes: {
+    // availableSizes: {
+    //     type: Array,
+    //     enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
+    // },
+    availableSizes: [{ //at least one size
         type: [String],
+        trim: true,
         enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
-    },
+    }],
     installments: Number,
     deletedAt: Date,
     isDeleted: {

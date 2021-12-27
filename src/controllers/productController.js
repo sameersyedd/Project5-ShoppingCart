@@ -17,9 +17,9 @@ const isValidObjectId = function(objectId) {
     return mongoose.Types.ObjectId.isValid(objectId)
 }
 
-const isValidSize = function(title) {
-    return ["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(title) !== -1
-}
+// const isValidSize = function(title) {
+//     return ["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(title) !== -1
+// }
 
 
 // AWS Fileupload -----------------------------------------------------------
@@ -122,20 +122,9 @@ const registerProduct = async function(req, res) {
             return res.status(400).send({ status: false, message: 'Please provide at least one available size' })
         }
 
-        if (!isValidSize(availableSizes)) {
-            return res.status(400).send({ status: false, message: 'Sizes can only be S, XS, X, M, L, XL, XXL' })
-        }
-
         if (installments) {
             if (isNaN(installments)) {
                 return res.status(400).send({ status: false, message: `Please provide a valid number in Installments field` })
-            }
-        }
-
-        if (isFreeShipping) {
-
-            if (!((isFreeShipping === "true") || (isFreeShipping === "false"))) {
-                return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
             }
         }
 
@@ -144,14 +133,61 @@ const registerProduct = async function(req, res) {
             res.status(400).send({ status: false, msg: "Please upload product image" });
         } else {
             const productImage = await uploadFile(files[0]);
-            const productData = { title, description, price, currencyId, currencyFormat, style, productImage, availableSizes, installments, isFreeShipping };
-            const newProduct = await productModel.create(productData);
+            let productData = { title, description, price, currencyId, currencyFormat, style, productImage, availableSizes, installments, isFreeShipping };
+            let sizes = availableSizes.split(",").map(x => x.trim())
+            for (let i = 0; i < sizes.length; i++) {
+                console.log(sizes)
+                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes[i]))) {
+                    return res.status(400).send({ status: false, message: `availableSizes should be among ${["S", "XS", "M", "X", "L", "XXL", "XL"].join(', ')}` })
+                }
+            }
+            if (Array.isArray(sizes)) {
+                productData['availableSizes'] = sizes
+            }
+            productData['availableSizes'] = sizes
+            let newProduct = await productModel.create(productData);
             res.status(201).send({ status: true, message: `products registered successfully`, data: newProduct });
         }
     } catch (error) {
         res.status(500).send({ status: false, Message: error.message })
     }
 }
+
+//API - 2 Get product by query filters
+const productByQuery = async function(req, res) {
+
+    try {
+        let saveQuery = req.query;
+        const { size, name, priceGT, priceLT } = saveQuery;
+        if (size || name || priceGT || priceLT) {
+            let body = {};
+            body.isDeleted = false
+            if (size) {
+                body.availableSizes = size
+            }
+            if (name) {
+                body.title = name
+            }
+            if (priceGT) {
+                body.price = { $gt: priceGT }
+            }
+            if (priceLT) {
+                body.price = { $lt: priceLT }
+            }
+            let getProduct = await productModel.find(body).sort({ price: 1 })
+            if (!(getProduct.length > 0)) {
+                return res.status(404).send({ status: false, message: " There is no such product, please valid query ", });
+            }
+            return res.status(200).send({ status: true, message: "Query Product list", data: getProduct, });
+        } else {
+            let productFound = await productModel.find()
+            return res.status(200).send({ status: true, message: "All Products List", data: productFound });
+        }
+    } catch (err) {
+        return res.status(500).send({ status: false, msg: err.message });
+    }
+}
+
 
 //API 3 Get Product by ID
 const getProductById = async(req, res) => {
@@ -173,7 +209,6 @@ const getProductById = async(req, res) => {
 }
 
 //API 5- Delete product by ID
-
 const deleteProductById = async(req, res) => {
     try {
         let productId = req.params.productId
@@ -193,4 +228,6 @@ const deleteProductById = async(req, res) => {
         return res.status(500).send({ status: false, msg: err.message });
     }
 }
-module.exports = { registerProduct, getProductById, deleteProductById }
+
+
+module.exports = { registerProduct, getProductById, deleteProductById, productByQuery }

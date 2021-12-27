@@ -2,6 +2,7 @@ const express = require('express');
 const userController = require('../controllers/userController.js')
 const productController = require('../controllers/productController.js')
 const mid = require('../middleware/mid.js')
+    // const validator = require('../validator/validator.js')
 const router = express.Router();
 module.exports = router;
 
@@ -17,3 +18,4 @@ router.put("/user/:userId/profile", mid.userAuth, userController.updateUserProfi
 router.post("/products", productController.registerProduct)
 router.get("/products/:productId", productController.getProductById)
 router.delete("/products/:productId", productController.deleteProductById)
+router.get("/products", productController.productByQuery)

@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const userModel = require('../models/userModel')
 const bcrypt = require('bcrypt')
 const aws = require("aws-sdk");
-const mongoose = require("mongoose")
+
 
 const isValid = function(value) {
     if (typeof value === 'undefined' || value === null) return false
