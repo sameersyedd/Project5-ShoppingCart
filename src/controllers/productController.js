@@ -49,109 +49,12 @@ let uploadFile = async(file) => {
     });
 };
 
-
-//API 1 Register Product =================================================================================================
-
-// const registerProduct = async function(req, res) {
-//     try {
-//         const requestBody = req.body
-
-//         if (!isValidRequestBody(requestBody)) {
-//             res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide product details" })
-//             return
-//         }
-
-//         // Extract params
-//         let { title, description, price, currencyId, currencyFormat, style, availableSizes, installments, isFreeShipping } = requestBody;
-
-
-//         if (!isValid(title)) {
-//             res.status(400).send({ status: false, Message: "Please provide product title" });
-//             return;
-//         }
-//         //title = title.trim();
-//         title = title.split(" ").join("").trim();
-//         const istitleAlreadyUsed = await productModel.findOne({ title: title }); // {email: email} object shorthand property
-
-//         if (istitleAlreadyUsed) {
-//             res.status(400).send({ status: false, message: `${title} title is already registered`, });
-//             return;
-//         }
-
-//         if (!isValid(description)) {
-//             res.status(400).send({ status: false, Message: "Please provide product description" });
-//             return;
-//         }
-//         description = description.trim();
-
-//         if (!isValid(price)) {
-//             res.status(400).send({ status: false, Message: "Please provide price", });
-//             return;
-//         }
-
-//         if ((isNaN(price)) || (price <= 0)) {
-//             res.status(400).send({ status: false, Message: "Pleave provide price in number & greater than zero", });
-//             return;
-//         }
-
-//         if (!isValid(currencyId)) {
-//             res.status(400).send({ status: false, Message: "Please provide currency ID", });
-//             return;
-//         }
-
-//         if (!(currencyId == "INR")) {
-//             return res.status(400).send({ status: false, message: 'currency ID should be INR only' })
-//         }
-
-//         if (!isValid(currencyFormat)) {
-//             res.status(400).send({ status: false, Message: "Please provide currency Format" });
-//             return;
-//         }
-
-//         if (!(currencyFormat == '₹')) {
-//             res.status(400).send({ status: false, Message: "currencyFormat should only be ₹" });
-//             return;
-//         }
-
-//         if (!isValid(availableSizes)) {
-//             return res.status(400).send({ status: false, message: 'Please provide at least one available size' })
-//         }
-
-//         if (installments) {
-//             if (isNaN(installments)) {
-//                 return res.status(400).send({ status: false, message: `Please provide a valid number in Installments field` })
-//             }
-//         }
-
-//         let files = req.files;
-//         if (!(files && files.length > 0)) {
-//             res.status(400).send({ status: false, msg: "Please upload product image" });
-//         } else {
-//             const productImage = await uploadFile(files[0]);
-//             let productData = { title, description, price, currencyId, currencyFormat, style, productImage, availableSizes, installments, isFreeShipping };
-//             let sizes = availableSizes.split(",").map(x => x.trim())
-//             for (let i = 0; i < sizes.length; i++) {
-//                 console.log(sizes)
-//                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes[i]))) {
-//                     return res.status(400).send({ status: false, message: `availableSizes should be among ${["S", "XS", "M", "X", "L", "XXL", "XL"].join(', ')}` })
-//                 }
-//             }
-//             if (Array.isArray(sizes)) {
-//                 productData['availableSizes'] = sizes
-//             }
-//             productData['availableSizes'] = sizes
-//             let newProduct = await productModel.create(productData);
-//             res.status(201).send({ status: true, message: `products registered successfully`, data: newProduct });
-//         }
-//     } catch (error) {
-//         res.status(500).send({ status: false, Message: error.message })
-//     }
-// }
-
 //API-1 Register Product
 const registerProduct = async function(req, res) {
     try {
 
+        requestBody = req.body
+        let { title, description, price, currencyId, currencyFormat, style, availableSizes, installments, isFreeShipping } = requestBody;
         let files = req.files;
         if (!(files && files.length > 0)) {
             res.status(400).send({ status: false, msg: "Please upload product image" });
