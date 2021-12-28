@@ -10,7 +10,7 @@ module.exports = router;
 
 //User Routes
 router.post("/register", validator.vUser, userController.registerUser)
-router.post("/login", userController.loginUser)
+router.post("/login", validator.validLogin, userController.loginUser)
 router.get("/user/:userId/profile", mid.userAuth, userController.getUserDetail)
 router.put("/user/:userId/profile", mid.userAuth, userController.updateUserProfile)
 
