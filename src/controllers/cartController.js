@@ -12,6 +12,7 @@ const isValidObjectId = function(objectId) {
     return mongoose.Types.ObjectId.isValid(objectId)
 }
 
+//Feature 3- API1 -create cart
 const createCart = async function(req, res) {
     try {
         const userId = req.params.userId
@@ -74,4 +75,42 @@ const createCart = async function(req, res) {
     }
 }
 
-module.exports = { createCart }
+//Feature 3 //API 3-get cart
+const getCart = async(req, res) => {
+    try {
+        let paramsId = req.params.userId
+        let checkId = isValidObjectId(paramsId);
+        if (!checkId) {
+            return res.status(400).send({ status: false, message: "Please Provide a valid userId in path params" });;
+        }
+        if (!(req.userId == paramsId)) {
+            return res.status(400).send({ message: "You are not authorized to use cart" })
+        }
+        const cartGet = await cartModel.findOne({ userId: paramsId });
+        return res.status(201).send({ status: true, message: 'Success', data: cartGet });
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
+}
+
+//Feature 3 - API 3 - Delete Cart/Empty Cart
+const cartDelete = async function(req, res) {
+    try {
+        let paramsId = req.params.userId
+        let checkId = isValidObjectId(paramsId);
+        if (!checkId) {
+            return res.status(400).send({ status: false, message: "Please Provide a valid userId in path params" });
+        }
+        if (!(req.userId == paramsId)) {
+            return res.status(400).send({ message: "You are not authorized to delete this cart" })
+        }
+
+        const deletedCart = await cartModel.findOneAndUpdate({ userId: paramsId }, { items: [], totalPrice: 0, totalItems: 0 }, { new: true })
+        res.status(200).send({ status: true, msg: 'All items removed from cart, cart is now empty', data: deletedCart })
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
+}
+
+
+module.exports = { createCart, getCart, cartDelete }
