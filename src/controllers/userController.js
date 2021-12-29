@@ -94,7 +94,7 @@ const loginUser = async function(req, res) {
     }
 }
 
-//API 3 -Get User Details===============================================================================
+//API 3 - Get User Details === === === === === === === === === === === === === === === === === === === === === === === === === === =
 
 const getUserDetail = async(req, res) => {
 
@@ -116,7 +116,7 @@ const getUserDetail = async(req, res) => {
     }
 }
 
-//API 4 - Update USER Details=========================================================================
+// //API 4 - Update USER Details=========================================================================
 
 const updateUserProfile = async(req, res) => {
 
