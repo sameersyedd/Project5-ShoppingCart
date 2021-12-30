@@ -2,6 +2,8 @@ const express = require('express');
 const userController = require('../controllers/userController.js')
 const productController = require('../controllers/productController.js')
 const cartController = require('../controllers/cartController.js')
+const orderController = require('../controllers/orderController.js')
+
 const mid = require('../middleware/mid.js')
 const validator = require('../validator/validator.js')
 const router = express.Router();
@@ -26,3 +28,7 @@ router.put("/products/:productId", productController.updateProductById)
 router.post("/users/:userId/cart", mid.userAuth, cartController.createCart)
 router.get("/users/:userId/cart", mid.userAuth, cartController.getCart)
 router.delete("/users/:userId/cart", mid.userAuth, cartController.cartDelete)
+
+//Order Routes
+router.post("/users/:userId/orders", mid.userAuth, orderController.createOrder)
+router.put("/users/:userId/orders", mid.userAuth, orderController.updateOrder)
