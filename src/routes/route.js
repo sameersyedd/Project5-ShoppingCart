@@ -28,6 +28,7 @@ router.put("/products/:productId", productController.updateProductById)
 router.post("/users/:userId/cart", mid.userAuth, cartController.createCart)
 router.get("/users/:userId/cart", mid.userAuth, cartController.getCart)
 router.delete("/users/:userId/cart", mid.userAuth, cartController.cartDelete)
+router.put("/users/:userId/cart", mid.userAuth, cartController.updateCart)
 
 //Order Routes
 router.post("/users/:userId/orders", mid.userAuth, orderController.createOrder)
