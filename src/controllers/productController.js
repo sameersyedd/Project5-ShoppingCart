@@ -165,7 +165,7 @@ const deleteProductById = async(req, res) => {
 const updateProductById = async function(req, res) {
     try {
         let pId = req.params.productId
-        let checkId = ObjectId.isValid(pId);
+        let checkId = isValidObjectId(pId);
         if (!checkId) {
             return res.status(400).send({ status: false, message: "Please Provide a valid productId in path params" });;
         }

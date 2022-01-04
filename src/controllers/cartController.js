@@ -124,7 +124,7 @@ const updateCart = async function(req, res) {
                             findCart.items.splice(i, 1)
 
                             const response = await cartModel.findOneAndUpdate({ _id: cartId }, { items: findCart.items, totalItems: totalItems1, totalPrice: updatedPrice }, { new: true })
-                            return res.status(201).send({ status: true, message: `1 product removed from the cart successfully`, data: response })
+                            return res.status(200).send({ status: true, message: `1 product removed from the cart successfully`, data: response })
 
                         }
                     } else {
@@ -141,7 +141,7 @@ const updateCart = async function(req, res) {
                             //remove that productId from items array
                         findCart.items.splice(i, 1)
                         const response = await cartModel.findOneAndUpdate({ _id: cartId }, { items: findCart.items, totalItems: totalItems1, totalPrice: updatedPrice }, { new: true })
-                        return res.status(201).send({ status: true, message: ` product removed from the cart successfully`, data: response })
+                        return res.status(200).send({ status: true, message: ` product removed from the cart successfully`, data: response })
 
                     } else {
                         return res.status(400).send({ status: false, message: `This product is not in cart` })
@@ -161,9 +161,9 @@ const getCart = async(req, res) => {
             return res.status(400).send({ status: false, message: "Please Provide a valid userId in path params" });;
         }
         if (!(req.userId == paramsId)) {
-            return res.status(400).send({ message: "You are not authorized to use cart" })
+            return res.status(401).send({ message: "You are not authorized to use cart" })
         }
-        const cartGet = await cartModel.findOne({ userId: paramsId });
+        const cartGet = await cartModel.findOne({ userId: paramsId }, { isDeleted: false });
         return res.status(201).send({ status: true, message: 'Success', data: cartGet });
     } catch (err) {
         res.status(500).send(err.message)
@@ -179,7 +179,7 @@ const cartDelete = async function(req, res) {
             return res.status(400).send({ status: false, message: "Please Provide a valid userId in path params" });
         }
         if (!(req.userId == paramsId)) {
-            return res.status(400).send({ message: "You are not authorized to delete this cart" })
+            return res.status(401).send({ message: "You are not authorized to delete this cart" })
         }
 
         const deletedCart = await cartModel.findOneAndUpdate({ userId: paramsId }, { items: [], totalPrice: 0, totalItems: 0 }, { new: true })

@@ -127,7 +127,7 @@ const updateUserProfile = async(req, res) => {
         let files = req.files;
 
         if (!isValidRequestBody(requestBody)) {
-            res.status(400).send({ status: false, Message: "No data updated. Details are unchanged" })
+            res.status(200).send({ status: false, Message: "No data updated. Details are unchanged" })
             return
         }
 

@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         unique: true,
-        require: "mobile number is required",
+        require: "password is required",
         trim: true,
         validator: {
             validator: function(password) {
